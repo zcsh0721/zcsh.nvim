@@ -1,11 +1,11 @@
 local M              = {}
-local utils = require('zcsh.utils')
+local utils          = require('zcsh.utils')
 
 -- 全局默认配置文件
 local default_config = require('zcsh.default_config')
 
 
-M.setup = function()
+M.setup = function(opts)
 	if vim.g.zcsh_init then
 		return
 	end
@@ -13,10 +13,16 @@ M.setup = function()
 
 	-- 项目级配置地址
 	local project_config_path = '/.config/zcsh/config.yaml'
-	
+
 	-- 先获取默认配置
 
 	vim.g.zcsh_config = default_config
+
+	-- 命令级别配置
+	if type(opts) == "table" then
+		vim.g.zcsh_config = vim.tbl_deep_extend('force', vim.g.zcsh_config, opts)
+	end
+
 	-- 项目级别配置覆盖默认配置
 	local project_root = utils.project.get_project_root()
 	if project_root and utils.file.is_exist_file(project_root .. project_config_path) then
@@ -26,7 +32,6 @@ M.setup = function()
 			vim.g.zcsh_config = vim.tbl_deep_extend('force', vim.g.zcsh_config, project_config_tbl)
 		end
 	end
-
 end
 -- 显示当前配置
 M.show_config = function()
